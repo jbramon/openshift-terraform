@@ -32,3 +32,13 @@ variable "ec2_private_key" {
   type        = string
   sensitive   = true
 }
+
+variable "gh_pat" {
+  description = "GitHub Personal Access Token"
+  type        = string
+  sensitive   = true
+}
+
+
+
+
