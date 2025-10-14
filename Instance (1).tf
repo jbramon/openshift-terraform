@@ -65,7 +65,7 @@ resource "aws_instance" "web" {
   oc delete secret github-credentials --ignore-not-found -n "$PROJECT"
   oc create secret generic github-credentials \
     --from-literal=username="jbramon" \
-    --from-literal=password="${GH_PAT}" \
+    --from-literal=password="$${GH_PAT}" \
     -n "$PROJECT"
 
   echo "===== Linking GitHub Secret to BuildConfig =====" >> /var/log/user_data.log
@@ -198,3 +198,4 @@ output "WebPrivateIP" {
   description = "Private IP of the EC2 instance"
   value       = aws_instance.web.private_ip
 }
+
