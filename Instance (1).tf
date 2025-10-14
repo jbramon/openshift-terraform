@@ -6,12 +6,13 @@ resource "aws_instance" "web" {
   availability_zone           = var.zone1
   associate_public_ip_address = true
 
- user_data = <<-EOF
+  user_data = <<-EOF
   #!/bin/bash
   echo "===== Starting EC2 setup for OpenShift deployment =====" >> /var/log/user_data.log
 
   export OC_CLUSTER_URL="${var.openshift_url}"
   export OC_TOKEN="${var.openshift_token}"
+  export GH_PAT="${var.gh_pat}"
   PROJECT="kylecanonigo-dev"
 
   yum update -y
@@ -60,7 +61,17 @@ resource "aws_instance" "web" {
       - type: ImageChange
   YAML
 
-  echo "===== FORCE REMOVING all webhooks from sample-app-jenkins-new =====" >> /var/log/user_data.log
+  echo "===== Creating GitHub Credentials Secret =====" >> /var/log/user_data.log
+  oc delete secret github-credentials --ignore-not-found -n "$PROJECT"
+  oc create secret generic github-credentials \
+    --from-literal=username="jbramon" \
+    --from-literal=password="${GH_PAT}" \
+    -n "$PROJECT"
+
+  echo "===== Linking GitHub Secret to BuildConfig =====" >> /var/log/user_data.log
+  oc set build-secret --source bc/ci-cd github-credentials -n "$PROJECT"
+
+  echo "===== Removing old webhooks from sample-app-jenkins-new =====" >> /var/log/user_data.log
   if oc get bc sample-app-jenkins-new -n "$PROJECT" >/dev/null 2>&1; then
     for i in {1..5}; do
       echo "Attempt $i to delete triggers..." >> /var/log/user_data.log
@@ -68,7 +79,7 @@ resource "aws_instance" "web" {
       sleep 5
       TRIGGERS=$(oc get bc sample-app-jenkins-new -n "$PROJECT" -o jsonpath='{.spec.triggers}' 2>/dev/null)
       if [[ -z "$TRIGGERS" || "$TRIGGERS" == "[]" ]]; then
-        echo "✅ All webhooks removed from sample-app-jenkins-new" >> /var/log/user_data.log
+        echo "✅ All webhooks removed successfully." >> /var/log/user_data.log
         break
       fi
       if [[ "$i" -eq 5 ]]; then
@@ -158,10 +169,8 @@ resource "aws_instance" "web" {
       termination: edge
   YAML
 
-  echo "===== ✅ Webhooks transferred successfully to ci-cd =====" >> /var/log/user_data.log
-  echo "===== Deployment complete =====" >> /var/log/user_data.log
+  echo "===== ✅ Deployment complete with GitHub authentication =====" >> /var/log/user_data.log
 EOF
-
 
   root_block_device {
     volume_size = 8
@@ -189,5 +198,3 @@ output "WebPrivateIP" {
   description = "Private IP of the EC2 instance"
   value       = aws_instance.web.private_ip
 }
-
-
