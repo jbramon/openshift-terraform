@@ -39,7 +39,6 @@ jobs:
             -var "ec2_private_key=${EC2_PRIVATE_KEY}"
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
         run: |
           terraform apply -auto-approve \
             -var "openshift_token=${OPENSHIFT_TOKEN}" \
