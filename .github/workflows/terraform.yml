@@ -44,4 +44,5 @@ jobs:
           terraform apply -auto-approve \
             -var "openshift_token=${OPENSHIFT_TOKEN}" \
             -var "openshift_url=${OPENSHIFT_URL}" \
-            -var "ec2_private_key=${EC2_PRIVATE_KEY}"
+            -var "ec2_private_key=${EC2_PRIVATE_KEY}" \
+            -var "gh_pat=${{ secrets.GH_PAT }}"
