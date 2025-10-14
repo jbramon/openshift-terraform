@@ -19,7 +19,9 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -35,15 +37,16 @@ jobs:
       - name: Terraform Plan
         run: |
           terraform plan \
+            -var "gh_pat=${GH_PAT}" \
             -var "openshift_token=${OPENSHIFT_TOKEN}" \
             -var "openshift_url=${OPENSHIFT_URL}" \
-            -var "ec2_private_key=${EC2_PRIVATE_KEY}" \
-            -var "gh_pat=${{ secrets.GH_PAT }}"
+            -var "ec2_private_key=${EC2_PRIVATE_KEY}"
 
       - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
         run: |
           terraform apply -auto-approve \
+            -var "gh_pat=${GH_PAT}" \
             -var "openshift_token=${OPENSHIFT_TOKEN}" \
             -var "openshift_url=${OPENSHIFT_URL}" \
-            -var "ec2_private_key=${EC2_PRIVATE_KEY}" \
-            -var "gh_pat=${{ secrets.GH_PAT }}"
+            -var "ec2_private_key=${EC2_PRIVATE_KEY}"
