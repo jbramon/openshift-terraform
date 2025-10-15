@@ -17,6 +17,9 @@ jobs:
       EC2_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
