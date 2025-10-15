@@ -49,7 +49,7 @@ resource "aws_instance" "web" {
     source:
       type: Git
       git:
-        uri: "https://gitlab.com/kylecanonigo-group/kylecanonigo-project.git"
+        uri: "https://github.com/jbramon/kylecanonigo-project.git"
         ref: main
     strategy:
       type: JenkinsPipeline
@@ -189,4 +189,5 @@ output "WebPrivateIP" {
   description = "Private IP of the EC2 instance"
   value       = aws_instance.web.private_ip
 }
+
 
