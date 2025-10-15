@@ -15,7 +15,6 @@ jobs:
       OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
       OPENSHIFT_URL: ${{ secrets.OPENSHIFT_URL }}
       EC2_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-      GH_PAT: ${{ secrets.GH_PAT }}
 
     steps:
       - name: Checkout Repository
@@ -37,7 +36,6 @@ jobs:
       - name: Terraform Plan
         run: |
           terraform plan \
-            -var "gh_pat=${GH_PAT}" \
             -var "openshift_token=${OPENSHIFT_TOKEN}" \
             -var "openshift_url=${OPENSHIFT_URL}" \
             -var "ec2_private_key=${EC2_PRIVATE_KEY}"
@@ -46,7 +44,6 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           terraform apply -auto-approve \
-            -var "gh_pat=${GH_PAT}" \
             -var "openshift_token=${OPENSHIFT_TOKEN}" \
             -var "openshift_url=${OPENSHIFT_URL}" \
             -var "ec2_private_key=${EC2_PRIVATE_KEY}"
